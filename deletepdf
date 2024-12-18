@@ -1,0 +1,40 @@
+# First, import necessary libraries
+from google.colab import files
+import PyPDF2
+import os
+
+# Upload the input PDF file
+uploaded = files.upload()
+
+# After uploading, confirm the file names
+input_pdf_path = 'input.pdf'  # Name of the file you uploaded (adjust if needed)
+output_pdf_path = 'output.pdf'
+
+# Function to delete a specific page from the PDF
+def delete_page_from_pdf(input_pdf_path, output_pdf_path, page_number_to_delete):
+    with open(input_pdf_path, 'rb') as input_pdf:
+        # Reading the input PDF
+        reader = PyPDF2.PdfReader(input_pdf)
+
+        # Create a PdfWriter object to write the modified PDF
+        writer = PyPDF2.PdfWriter()
+
+        # Add all pages to the writer except the one to be deleted
+        for page_num in range(len(reader.pages)):
+            if page_num != page_number_to_delete:
+                writer.add_page(reader.pages[page_num])
+
+        # Write the modified content to the output PDF
+        with open(output_pdf_path, 'wb') as output_pdf:
+            writer.write(output_pdf)
+
+    print(f"Page {page_number_to_delete + 1} deleted from the PDF. Output saved to {output_pdf_path}.")
+
+# Specify which page you want to delete (e.g., delete the 4th page, so index 3)
+page_to_delete = 3  # The index of the page you want to delete (e.g., delete page 4: index 3)
+
+# Call the function to delete the page
+delete_page_from_pdf(input_pdf_path, output_pdf_path, page_to_delete)
+
+# Allow download of the modified file
+files.download(output_pdf_path)

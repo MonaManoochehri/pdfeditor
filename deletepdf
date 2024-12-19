@@ -1,18 +1,27 @@
+# Install PyPDF2 library
+!pip install PyPDF2
+
+# Import necessary libraries
 from google.colab import files
 import PyPDF2
-import os
 
-# input PDF file
-uploaded = files.upload()
+# Upload the input PDF file
+uploaded = files.upload()  # This will prompt the user to upload a file
 
-input_pdf_path = 'input.pdf'  # Name of the file you uploaded (adjust if needed)
-output_pdf_path = 'output.pdf'
+# Retrieve the name of the uploaded file
+input_pdf_path = list(uploaded.keys())[0]  # Get the first uploaded file's name dynamically
+output_pdf_path = f"modified_{input_pdf_path}"  # Create the output file name based on the input file name
 
-# delete a specific page from the PDF
+# Function to delete a specific page from the PDF
 def delete_page_from_pdf(input_pdf_path, output_pdf_path, page_number_to_delete):
     with open(input_pdf_path, 'rb') as input_pdf:
         # Reading the input PDF
         reader = PyPDF2.PdfReader(input_pdf)
+
+        # Check if the page number is valid
+        if page_number_to_delete < 0 or page_number_to_delete >= len(reader.pages):
+            print(f"Invalid page number: {page_number_to_delete + 1}. PDF has {len(reader.pages)} pages.")
+            return
 
         # Create a PdfWriter object to write the modified PDF
         writer = PyPDF2.PdfWriter()
@@ -28,11 +37,15 @@ def delete_page_from_pdf(input_pdf_path, output_pdf_path, page_number_to_delete)
 
     print(f"Page {page_number_to_delete + 1} deleted from the PDF. Output saved to {output_pdf_path}.")
 
-# Specify which page you want to delete (e.g., delete the 4th page, so index 3)
-page_to_delete = 3  # The index of the page you want to delete (e.g., delete page 4: index 3)
-
-# Call the function to delete the page
-delete_page_from_pdf(input_pdf_path, output_pdf_path, page_to_delete)
-
-# Allow download of the modified file
-files.download(output_pdf_path)
+# Get the page number from the user
+try:
+    page_to_delete = int(input(f"Enter the page number to delete (1 to {len(PyPDF2.PdfReader(open(input_pdf_path, 'rb')).pages)}): ")) - 1  # Convert to 0-based index
+    # Call the function to delete the page
+    delete_page_from_pdf(input_pdf_path, output_pdf_path, page_to_delete)
+    
+    # Allow download of the modified file
+    files.download(output_pdf_path)
+except ValueError:
+    print("Invalid input! Please enter a valid page number.")
+except Exception as e:
+    print(f"An error occurred: {e}")
